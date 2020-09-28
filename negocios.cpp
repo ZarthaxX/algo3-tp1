@@ -74,6 +74,12 @@ int BT(int i, int contagio, int beneficio){
 		return -INF;
 	}
 
+	//poda por optimalidad
+	if (poda_optimalidad_2 && (beneficio_opt - beneficio) > beneficio_acum_2[i])
+	{
+		return -INF;
+	}
+	
 	int uso_negocio = BT(i + 2, contagio + negocios[i].contagio, beneficio + negocios[i].beneficio);
 	int no_uso_negocio = BT(i + 1, contagio, beneficio);
 
