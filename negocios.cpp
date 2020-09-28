@@ -9,6 +9,9 @@
 
 using namespace std;
 
+//Info para experimentos
+int total_nodes = 0;
+
 const int INF = 10e6; // Valor para indicar que no hubo solución.
 const int UNDEFINED = -1;
 int beneficio_opt = -INF;
@@ -31,8 +34,9 @@ i = posicion del comercio sobre el que queremos decidir
 w = contagio acumulado en el intervalo [0,i)
 k = beneficio acumulado en el intervalo [0,i)
 */
-int FB(int i, int contagio, int beneficio)
-{
+int FB(int i, int contagio, int beneficio){
+	total_nodes++;
+
 	if(i >= cant_negocios){
 		if(contagio <= contagio_limite){
 			return beneficio;
@@ -48,9 +52,11 @@ int FB(int i, int contagio, int beneficio)
 }
 
 int BT(int i, int contagio, int beneficio){
+	total_nodes++;
+
 	if (i >= cant_negocios){
 		if (contagio <= contagio_limite){
-			
+			beneficio_opt = max(beneficio, beneficio_opt);
 			return beneficio;
 		}
 		else{
@@ -76,8 +82,9 @@ int BT(int i, int contagio, int beneficio){
 
 vector<vector<int>> cache;
 
-int DP(int i, int contagio)
-{
+int DP(int i, int contagio){
+	total_nodes++;
+
 	if(i >= cant_negocios){
 		return 0;
 	}
@@ -98,7 +105,6 @@ int DP(int i, int contagio)
 
 	return cache[i][contagio];
 }
-
 
 // Recibe por parámetro qué algoritmos utilizar para la ejecución separados por espacios.
 // Imprime por clog la información de ejecución de los algoritmos.
@@ -147,7 +153,7 @@ int main(int argc, char** argv)
 	beneficio_acum_1[cant_negocios-1] = negocios[cant_negocios-1].beneficio;
 	for(int i=cant_negocios-2; i>=0 ;i--)
 		beneficio_acum_1[i] = beneficio_acum_1[i+1] + negocios[i].beneficio;
-
+	
 	//inicializamos el vector de beneficio acumulado 2
 	if(cant_negocios%2==1){
 		beneficio_acum_2.assign(cant_negocios + 1, 0);
@@ -217,7 +223,7 @@ int main(int argc, char** argv)
 
 	// Imprimimos el tiempo de ejecución por stderr.
 	clog << total_time << endl;
-
+	clog << total_nodes << endl;
     // Imprimimos el resultado por stdout.
     cout << (optimum == INF ? -1 : optimum) << endl;
     return 0;
