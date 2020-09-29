@@ -44,3 +44,8 @@ tipo de instancias
 -backtrack
 
 -dinamica
+
+-graficos
+
+-bt mejor fact : elegimos graficar nodos promedio en lugar del tiempo, porque no se puede apreciar bien la linealidad
+                hay que ver si con n = 10k se aprecia utilizando el tiempo

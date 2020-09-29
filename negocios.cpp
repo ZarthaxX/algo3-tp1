@@ -10,31 +10,31 @@
 using namespace std;
 
 //Info para experimentos
-int total_nodes = 0;
+long long total_nodes = 0;
 
-const int INF = 10e6; // Valor para indicar que no hubo solución.
-const int UNDEFINED = -1;
-int beneficio_opt = -INF;
+const long long INF = 10e6; // Valor para indicar que no hubo solución.
+const long long UNDEFINED = -1;
+long long beneficio_opt = -INF;
 bool poda_optimalidad_1;
 bool poda_optimalidad_2;
 bool poda_factibilidad;
-vector<int> beneficio_acum_1;	//en la posicióm i contiene la suma acumulada de beneficio en el intervalo [i,n] 
-vector<int> beneficio_acum_2;
+vector<long long> beneficio_acum_1;	//en la posicióm i contiene la suma acumulada de beneficio en el long longervalo [i,n] 
+vector<long long> beneficio_acum_2;
 
 struct Negocio {
-	int beneficio;
-	int contagio;
+	long long beneficio;
+	long long contagio;
 };
 
 // Información de la instancia a resolver.
-int cant_negocios, contagio_limite;
+long long cant_negocios, contagio_limite;
 vector<Negocio> negocios;
 /*
 i = posicion del comercio sobre el que queremos decidir
-w = contagio acumulado en el intervalo [0,i)
-k = beneficio acumulado en el intervalo [0,i)
+w = contagio acumulado en el long longervalo [0,i)
+k = beneficio acumulado en el long longervalo [0,i)
 */
-int FB(int i, int contagio, int beneficio){
+long long FB(long long i, long long contagio, long long beneficio){
 	total_nodes++;
 
 	if(i >= cant_negocios){
@@ -45,13 +45,13 @@ int FB(int i, int contagio, int beneficio){
 		}
 	}
 
-	int uso_negocio = FB(i + 2, contagio + negocios[i].contagio, beneficio + negocios[i].beneficio);
-	int no_uso_negocio = FB(i + 1, contagio, beneficio);
+	long long uso_negocio = FB(i + 2, contagio + negocios[i].contagio, beneficio + negocios[i].beneficio);
+	long long no_uso_negocio = FB(i + 1, contagio, beneficio);
 
 	return max(uso_negocio, no_uso_negocio);
 }
 
-int BT(int i, int contagio, int beneficio){
+long long BT(long long i, long long contagio, long long beneficio){
 	total_nodes++;
 
 	if (i >= cant_negocios){
@@ -80,15 +80,15 @@ int BT(int i, int contagio, int beneficio){
 		return -INF;
 	}
 	
-	int uso_negocio = BT(i + 2, contagio + negocios[i].contagio, beneficio + negocios[i].beneficio);
-	int no_uso_negocio = BT(i + 1, contagio, beneficio);
+	long long uso_negocio = BT(i + 2, contagio + negocios[i].contagio, beneficio + negocios[i].beneficio);
+	long long no_uso_negocio = BT(i + 1, contagio, beneficio);
 
 	return max(uso_negocio,no_uso_negocio);
 }
 
-vector<vector<int>> cache;
+vector<vector<long long>> cache;
 
-int DP(int i, int contagio){
+long long DP(long long i, long long contagio){
 	total_nodes++;
 
 	if(i >= cant_negocios){
@@ -99,8 +99,8 @@ int DP(int i, int contagio){
 		return cache[i][contagio];
 	}
 
-	int uso_negocio= -INF;
-	int no_uso_negocio= -INF;
+	long long uso_negocio= -INF;
+	long long no_uso_negocio= -INF;
 
 	if(contagio >= negocios[i].contagio)
 		uso_negocio = DP(i+2, contagio - negocios[i].contagio) + negocios[i].beneficio;
@@ -118,7 +118,7 @@ int DP(int i, int contagio){
 int main(int argc, char** argv)
 {	
 	cout << argc << endl;
-	for(int i=0;i< argc;i++)
+	for(long long i=0;i< argc;i++)
 		cout<<argv[i]<<endl; 
 	
 	// Leemos el parametro que indica el algoritmo a ejecutar.
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
     cin >> cant_negocios >> contagio_limite;
     negocios.assign(cant_negocios,{});
 	
-    for (int i = 0; i < cant_negocios; ++i){
+    for (long long i = 0; i < cant_negocios; ++i){
 		Negocio negocio;
 		cin >> negocio.beneficio >> negocio.contagio;
 
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 	//inicializamos el vector de beneficio acumulado 1
 	beneficio_acum_1.assign(cant_negocios,0);
 	beneficio_acum_1[cant_negocios-1] = negocios[cant_negocios-1].beneficio;
-	for(int i=cant_negocios-2; i>=0 ;i--)
+	for(long long i=cant_negocios-2; i>=0 ;i--)
 		beneficio_acum_1[i] = beneficio_acum_1[i+1] + negocios[i].beneficio;
 	
 	//inicializamos el vector de beneficio acumulado 2
@@ -168,22 +168,22 @@ int main(int argc, char** argv)
 	}
 	else{
 		beneficio_acum_2.assign(cant_negocios, 0);
-		int max_beneficio = max(negocios[cant_negocios - 2].beneficio,negocios[cant_negocios - 1].beneficio);
+		long long max_beneficio = max(negocios[cant_negocios - 2].beneficio,negocios[cant_negocios - 1].beneficio);
 		beneficio_acum_2[cant_negocios - 2] = max_beneficio;
 		beneficio_acum_2[cant_negocios - 1] = max_beneficio;
 	}
-	 
-	for (int i = beneficio_acum_2.size()-1-3; i >= 0; i-=2){
-		int max_beneficio = max(beneficio_acum_2[i + 2], beneficio_acum_2[i + 3]);
-		beneficio_acum_2[i] = max_beneficio;
-		beneficio_acum_2[i+1] = max_beneficio;
+
+	for (long long i = beneficio_acum_2.size()-1-3; i >= 0; i-=2){
+		long long max_beneficio_acum = max(beneficio_acum_2[i + 2], beneficio_acum_2[i + 3]);
+		long long max_beneficio = max(negocios[i].beneficio,negocios[i+1].beneficio);
+		beneficio_acum_2[i] = beneficio_acum_2[i+1] = max_beneficio + max_beneficio_acum;
 	}
 	
 	// Ejecutamos el algoritmo y obtenemos su tiempo de ejecución.
-	int optimum;
+	long long optimum;
 	optimum = INF;
 	auto start = chrono::steady_clock::now();
-
+	
 	if (algoritmo == "FB")
 	{
 		optimum = FB(0, 0, 0);
@@ -220,10 +220,10 @@ int main(int argc, char** argv)
 	}
 	else if (algoritmo == "DP")
 	{
-		cache.assign(cant_negocios, vector<int>(contagio_limite+1, UNDEFINED));
+		cache.assign(cant_negocios, vector<long long>(contagio_limite+1, UNDEFINED));
 		optimum = DP(0, contagio_limite);
 	}
-
+	
 	auto end = chrono::steady_clock::now();
 	double total_time = chrono::duration<double, milli>(end - start).count();
 
