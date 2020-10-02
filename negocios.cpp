@@ -17,9 +17,11 @@ const long long UNDEFINED = -1;
 long long beneficio_opt = -INF;
 bool poda_optimalidad_1;
 bool poda_optimalidad_2;
+bool poda_optimalidad_3;
 bool poda_factibilidad;
 vector<long long> beneficio_acum_1;	//en la posicióm i contiene la suma acumulada de beneficio en el long longervalo [i,n] 
 vector<long long> beneficio_acum_2;
+vector<long long> beneficio_acum_3;
 
 struct Negocio {
 	long long beneficio;
@@ -79,6 +81,12 @@ long long BT(long long i, long long contagio, long long beneficio){
 	{
 		return -INF;
 	}
+
+	//poda por optimalidad
+	if (poda_optimalidad_3 && (beneficio_opt - beneficio) > beneficio_acum_3[i])
+	{
+		return -INF;
+	}
 	
 	long long uso_negocio = BT(i + 2, contagio + negocios[i].contagio, beneficio + negocios[i].beneficio);
 	long long no_uso_negocio = BT(i + 1, contagio, beneficio);
@@ -117,10 +125,6 @@ long long DP(long long i, long long contagio){
 // Imprime por cout el resultado de algun algoritmo ejecutado.
 int main(int argc, char** argv)
 {	
-	cout << argc << endl;
-	for(long long i=0;i< argc;i++)
-		cout<<argv[i]<<endl; 
-	
 	// Leemos el parametro que indica el algoritmo a ejecutar.
 	map<string, string> algoritmos_implementados = {
 		{"FB", "Fuerza Bruta"}, 
@@ -128,6 +132,7 @@ int main(int argc, char** argv)
 		{"BT-F", "Backtracking con poda por factibilidad"},
 		{"BT-O1", "Backtracking con poda por optimalidad 1"},
 		{"BT-O2", "Backtracking con poda por optimalidad 2"},
+		{"BT-O3", "Backtracking con poda por optimalidad 3"},
 		{"DP", "Programacion dinámica"}};
 
 	// Verificar que el algoritmo pedido exista.
@@ -178,7 +183,17 @@ int main(int argc, char** argv)
 		long long max_beneficio = max(negocios[i].beneficio,negocios[i+1].beneficio);
 		beneficio_acum_2[i] = beneficio_acum_2[i+1] = max_beneficio + max_beneficio_acum;
 	}
-	
+
+	//inicializamos el vector de beneficio acumulado 3
+	beneficio_acum_3.assign(cant_negocios,0);
+	beneficio_acum_3[cant_negocios-1] = negocios[cant_negocios-1].beneficio;
+	if(cant_negocios>1){
+		beneficio_acum_3[cant_negocios-2] = max(negocios[cant_negocios-1].beneficio,
+												negocios[cant_negocios-2].beneficio);
+	}
+	for(long long i=cant_negocios-1-2; i>=0 ;i--)
+		beneficio_acum_3[i] = max(negocios[i].beneficio + beneficio_acum_3[i+2],
+								  beneficio_acum_3[i+1]);
 	// Ejecutamos el algoritmo y obtenemos su tiempo de ejecución.
 	long long optimum;
 	optimum = INF;
@@ -191,7 +206,7 @@ int main(int argc, char** argv)
 	else if (algoritmo == "BT")
 	{
 		beneficio_opt = -INF;
-		poda_optimalidad_1 = poda_optimalidad_2 = poda_factibilidad = true;
+		poda_optimalidad_1 = poda_optimalidad_2 = poda_optimalidad_3 = poda_factibilidad = true;
 		optimum = BT(0, 0, 0);
 	}
 	else if (algoritmo == "BT-F")
@@ -199,6 +214,7 @@ int main(int argc, char** argv)
 		beneficio_opt = -INF;
 		poda_optimalidad_1 = false;
 		poda_optimalidad_2 = false;
+		poda_optimalidad_3 = false;
 		poda_factibilidad = true;
 		optimum = BT(0, 0, 0);
 	}
@@ -207,6 +223,7 @@ int main(int argc, char** argv)
 		beneficio_opt = -INF;
 		poda_optimalidad_1 = true;
 		poda_optimalidad_2 = false;
+		poda_optimalidad_3 = false;
 		poda_factibilidad = false;
 		optimum = BT(0, 0, 0);
 	}
@@ -215,6 +232,16 @@ int main(int argc, char** argv)
 		beneficio_opt = -INF;
 		poda_optimalidad_1 = false;
 		poda_optimalidad_2 = true;
+		poda_optimalidad_3 = false;
+		poda_factibilidad = false;
+		optimum = BT(0, 0, 0);
+	}
+	else if (algoritmo == "BT-O3")
+	{
+		beneficio_opt = -INF;
+		poda_optimalidad_1 = false;
+		poda_optimalidad_2 = false;
+		poda_optimalidad_3 = true;
 		poda_factibilidad = false;
 		optimum = BT(0, 0, 0);
 	}
